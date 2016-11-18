@@ -23,7 +23,7 @@ import os
 import subprocess
 import sys
 import urllib2
-import xml.etree.ElementTree
+import xml.etree.ElementTree as ElementTree
 from multiprocessing import Pool
 
 __version__ = '1.0.0'
@@ -77,7 +77,8 @@ if verbose:
     print 'Actual SDK m2repository folders:\n  %s' % '\n  '.join(sdk_m2_repos)
 
 auth_base64 = ''
-mvn_settings = xml.etree.ElementTree.parse(os.environ['HOME'] + '/.m2/settings.xml').getroot()
+settings_file = os.path.join(os.path.expanduser('~') , '.m2', 'settings.xml')
+mvn_settings = ElementTree.parse(settings_file).getroot()
 for server_config in mvn_settings.iterfind('servers/server'):
     if server_config.find('id').text == repo_id:
         username = server_config.find('username').text
@@ -134,9 +135,11 @@ print '\rLoaded %s artifacts from your local SDK.            ' % len(sdk_artifac
 if verbose:
     print
 
+
 class HeadRequest(urllib2.Request):
     def get_method(self):
         return 'HEAD'
+
 
 def remote_has_artifact(sdk_artifact):
     relative_file = sdk_artifact['relative_file']
